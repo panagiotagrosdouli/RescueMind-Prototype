@@ -203,7 +203,12 @@ def evaluate_associations(
     expected_by_observation: dict[str, str],
     previous_by_observation: dict[str, str] | None = None,
 ) -> AssociationMetrics:
-    """Evaluate an assignment against labelled synthetic correspondences."""
+    """Evaluate an assignment against labelled synthetic correspondences.
+
+    An ID switch is counted only when the current association is correct and its
+    hypothesis identity differs from the previous association. Incorrect current
+    assignments remain false associations and are not double-counted as switches.
+    """
 
     observed = {match.observation_id: match.hypothesis_id for match in result.matches}
     correct = 0
@@ -218,9 +223,9 @@ def evaluate_associations(
             missed += 1
         elif actual == expected_hypothesis:
             correct += 1
+            if observation_id in previous and actual != previous[observation_id]:
+                switches += 1
         else:
             false += 1
-        if observation_id in previous and actual is not None and actual != previous[observation_id]:
-            switches += 1
 
     return AssociationMetrics(correct, false, missed, switches)
