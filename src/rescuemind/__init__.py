@@ -15,6 +15,13 @@ from .models import (
 )
 from .pipeline import run_simulation
 from .simulation import DisasterWorld, SensorSuite, TemporalBuffer
+from .spatial import (
+    AssociationMetrics,
+    AssignmentResult,
+    MahalanobisAssociator,
+    SpatialMatch,
+    evaluate_associations,
+)
 from .temporal import AlignedObservation, AsynchronousObservationBuffer, ClockOffsetRegistry
 
 __version__ = "0.2.0"
@@ -23,6 +30,8 @@ __all__ = [
     "Agent",
     "AlignedObservation",
     "Allocator",
+    "AssociationMetrics",
+    "AssignmentResult",
     "AsynchronousObservationBuffer",
     "ClockOffsetRegistry",
     "CommunicationNetwork",
@@ -33,6 +42,7 @@ __all__ = [
     "Fusion",
     "Hazard",
     "Hypothesis",
+    "MahalanobisAssociator",
     "Observation",
     "Pose2D",
     "PriorityEstimate",
@@ -40,8 +50,10 @@ __all__ = [
     "Provenance",
     "ReliabilityState",
     "SensorSuite",
+    "SpatialMatch",
     "Survivor",
     "TemporalBuffer",
     "calibration_metrics",
+    "evaluate_associations",
     "run_simulation",
 ]
