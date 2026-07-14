@@ -1,204 +1,74 @@
 # RescueMind Prototype
 
-> **A research software platform for uncertainty-aware, multi-agent disaster perception and operational rescue prioritization.**
+> Uncertainty-aware multi-agent perception and human-supervised rescue decision support in synthetic post-disaster environments.
 
-RescueMind Prototype is the implementation repository of the broader [RescueMind research initiative](https://github.com/panagiotagrosdouli/RescueMind). It provides the computational foundation for studying how heterogeneous robotic agents can transform fragmented, noisy, and incomplete observations into interpretable decision support for post-disaster urban search and rescue.
+[Research vision and system rationale](https://github.com/panagiotagrosdouli/RescueMind)
 
-The project is motivated by a central operational question:
+## Verified scope
 
-> **How can distributed robotic perception be converted into calibrated, actionable, and human-interpretable rescue intelligence under severe uncertainty?**
+RescueMind-Prototype is a **research prototype** validated only in deterministic synthetic simulations. It implements a CPU-only integrated pipeline with UAV, UGV, and static sensing agents; multimodal observations; reliability-aware fusion; a dynamic disaster twin; survivor hypotheses; interpretable rescue-priority estimates; degraded communication; task allocation; and grounded explanations.
 
-The repository is designed as a modular experimental platform rather than a monolithic application. It will support reproducible simulation studies, probabilistic sensor fusion, dynamic mapping, multi-agent coordination, rescue-priority estimation, and human-facing evaluation.
+It is **not** an operational command system, medical device, structural-assessment tool, or autonomous rescue authority. It has not been field-, hardware-, ROS2-, or external-dataset validated.
 
-## Research Scope
+## Quick start
 
-RescueMind investigates the intersection of:
-
-- heterogeneous multi-robot systems;
-- collaborative and distributed perception;
-- multimodal sensor fusion;
-- uncertainty-aware machine learning;
-- probabilistic spatial mapping;
-- autonomous exploration and task allocation;
-- edge intelligence under degraded connectivity;
-- explainable decision support for emergency response.
-
-The software is intended to support research questions concerning not only whether a survivor-related signal can be detected, but also how evidence should be combined, ranked, explained, and updated as the environment evolves.
-
-## Relation to the Main Repository
-
-The scientific motivation, conceptual architecture, research questions, and long-term vision are maintained in:
-
-**[panagiotagrosdouli/RescueMind](https://github.com/panagiotagrosdouli/RescueMind)**
-
-This repository contains the implementation layer: source code, simulation environments, configuration files, experiments, benchmarks, tests, and technical documentation.
-
-## System Objectives
-
-The initial development programme focuses on six tightly connected capabilities.
-
-### 1. Heterogeneous Agent Modelling
-
-Represent aerial robots, ground robots, and deployable sensing nodes with distinct sensing, mobility, endurance, communication, and risk characteristics.
-
-### 2. Multimodal Perception
-
-Process synthetic and, later, real observations from thermal cameras, RGB sensors, depth sensors, microphones, radar, environmental sensors, and robot-state estimators.
-
-### 3. Uncertainty-Aware Sensor Fusion
-
-Combine asynchronous and potentially contradictory observations while preserving confidence, provenance, temporal validity, and spatial consistency.
-
-### 4. Living Disaster Twin
-
-Maintain a continuously updated probabilistic representation of the affected environment, including geometry, accessibility, hazards, survivor hypotheses, and confidence estimates.
-
-### 5. Rescue Priority Estimation
-
-Develop and evaluate a transparent Rescue Priority Index that ranks candidate intervention locations using evidence of human presence, survivability indicators, accessibility, structural risk, expected intervention time, and model uncertainty.
-
-### 6. Human-Centred Decision Support
-
-Expose the evidence behind each recommendation, communicate uncertainty explicitly, and preserve human authority over operational decisions.
-
-## Conceptual Processing Pipeline
-
-```text
-Robot and sensor observations
-            │
-            ▼
-Temporal alignment and validation
-            │
-            ▼
-Modality-specific perception
-            │
-            ▼
-Uncertainty-aware evidence fusion
-            │
-            ▼
-Dynamic probabilistic world model
-            │
-            ▼
-Survivor and hazard hypotheses
-            │
-            ▼
-Rescue Priority Index
-            │
-            ▼
-Human-interpretable decision support
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e '.[dev]'
+pytest
+python scripts/run_all.py --mode smoke
+python scripts/run_benchmark_suite.py --num-seeds 5
 ```
 
-## Scientific Design Principles
+Run modes: `smoke`, `perception`, `fusion`, `digital-twin`, `coordination`, `priority`, `benchmark`, `full`.
 
-The implementation will be guided by the following principles:
+## Implemented research components
 
-- **Explicit uncertainty:** predictions must include calibrated confidence rather than binary certainty.
-- **Traceable evidence:** every derived hypothesis should retain links to its supporting observations.
-- **Modularity:** perception, mapping, coordination, and prioritization components should be independently testable.
-- **Reproducibility:** experiments should be configuration-driven and produce machine-readable outputs.
-- **Graceful degradation:** the system should remain interpretable under sensor failure, missing data, or communication loss.
-- **Human oversight:** the software provides decision support and does not autonomously make life-critical decisions.
-- **Operational realism:** evaluation should include occlusion, dust, darkness, noise, localization drift, intermittent networks, and evolving hazards.
+| Component | Status |
+|---|---|
+| Deterministic 2D disaster simulation | Research Prototype |
+| UAV, UGV, static sensor node | Implemented |
+| Thermal, RGB, acoustic, radar, environmental observations | Synthetic Validation |
+| Depth capability/accessibility scaffold | Experimental |
+| Reliability states and environment-dependent degradation | Implemented |
+| Temporal buffering and stale-data rejection | Implemented |
+| Fixed, reliability-weighted, Bayesian fusion | Implemented |
+| Provenance and duplicate rejection | Implemented |
+| Modality conflict detection | Implemented |
+| Dynamic Living Disaster Twin | Research Prototype |
+| Survivor hypothesis lifecycle subset | Experimental |
+| Dynamic fire hazard and blocked-access evolution | Research Prototype |
+| Decomposable Rescue Priority Index with intervals | Implemented |
+| Priority reversal metric | Implemented |
+| Nearest, greedy, information-gain, communication-aware allocation | Implemented |
+| Packet loss and delayed-message simulation | Implemented |
+| Grounded explanation and counterfactual | Research Prototype |
+| Brier, ECE, MCE, precision, recall, F1 metrics | Synthetic Validation |
+| GIF and MP4 generation pipeline | Implemented when encoder is available |
+| ROS2 runtime | Pending ROS2 Validation |
+| External datasets | Pending Dataset Validation |
+| Physical robots | Pending Hardware Validation |
 
-## Planned Repository Structure
+## Architecture
 
-```text
-RescueMind-Prototype/
-├── README.md
-├── pyproject.toml
-├── requirements.txt
-├── LICENSE
-├── .gitignore
-├── configs/
-│   └── default.yaml
-├── docs/
-│   ├── system_architecture.md
-│   ├── research_hypothesis.md
-│   ├── evaluation_protocol.md
-│   └── design_decisions.md
-├── src/
-│   └── rescuemind/
-│       ├── perception/
-│       ├── sensor_fusion/
-│       ├── mapping/
-│       ├── coordination/
-│       ├── rescue_priority/
-│       ├── digital_twin/
-│       └── utils/
-├── simulations/
-├── experiments/
-├── examples/
-└── tests/
+`world → heterogeneous agents → synthetic sensors → reliability → temporal alignment → fusion → conflict detection → hypotheses → disaster twin → rescue priority → allocation → explanation`
+
+## Reproducibility evidence
+
+The implementation session executed installation, tests, all principal run modes, and a five-seed benchmark. The exact commands, repaired Bayesian-fusion failure, limitations, and blockers are recorded in `WORK_LOG.md`, `docs/REPOSITORY_AUDIT.md`, `STATUS.yaml`, and `BLOCKERS.md`.
+
+Each run writes generated metrics, manifests, figures, a report, a GIF, and an MP4 or an explicit encoder blocker. Quantitative outputs are synthetic and must not be interpreted as emergency-response performance.
+
+## Docker
+
+```bash
+docker build -t rescuemind .
+docker run --rm -v "$(pwd)/results:/app/results" rescuemind python scripts/run_all.py --mode smoke
 ```
 
-## Initial Technology Direction
+The Dockerfile is provided, but local daemon validation was unavailable during the implementation session and is not claimed.
 
-The exact stack will evolve with the experimental requirements. The current technical direction includes:
+## Responsible use
 
-- Python 3.11+
-- ROS 2
-- NumPy and SciPy
-- PyTorch
-- OpenCV
-- Open3D
-- NetworkX
-- Pydantic
-- PyYAML
-- pytest
-- Gazebo or Isaac Sim
-- Docker
-- GitHub Actions
-
-Dependencies will be introduced only when they support a concrete, documented requirement.
-
-## Evaluation Strategy
-
-The project will be evaluated progressively, beginning with controlled synthetic scenarios and advancing toward more realistic robotic experiments.
-
-Core evaluation dimensions include:
-
-- survivor-detection sensitivity and false-alarm rate;
-- probabilistic calibration;
-- spatial localization error;
-- map consistency under changing conditions;
-- robustness to missing or conflicting sensor data;
-- communication efficiency;
-- prioritization stability;
-- explanation fidelity;
-- computational latency;
-- performance under degraded sensing and connectivity.
-
-A baseline is considered meaningful only when the experimental assumptions, data generation process, metrics, and limitations are documented.
-
-## Development Stages
-
-1. **Foundation** — package structure, configuration system, data models, tests, and continuous integration.
-2. **Simulation baseline** — synthetic disaster environments and heterogeneous agent models.
-3. **Perception baseline** — modality-specific observation models and survivor-related signal detection.
-4. **Fusion layer** — probabilistic evidence integration with confidence and provenance tracking.
-5. **Dynamic world model** — Living Disaster Twin and spatial hypothesis management.
-6. **Priority model** — interpretable Rescue Priority Index with sensitivity analysis.
-7. **Coordination** — information-driven exploration and task allocation.
-8. **Human interface** — evidence views, uncertainty communication, and decision-support experiments.
-9. **Hardware validation** — controlled tests on selected aerial, ground, or sensing platforms.
-
-## Current Status
-
-**Research software foundation stage.**
-
-The complete system described above has not yet been implemented or operationally validated. The repository will document incremental prototypes, negative results, limitations, assumptions, and experimental evidence as development progresses.
-
-## Responsible Research Statement
-
-RescueMind is intended for humanitarian research and decision-support experimentation. Any future deployment in real emergency operations would require extensive validation, collaboration with certified rescue professionals, safety engineering, cybersecurity assessment, regulatory compliance, and controlled field testing.
-
-No model output should be interpreted as a substitute for professional emergency-response judgement.
-
-## Author
-
-**Panagiota Grosdouli**  
-Electrical and Computer Engineering
-
-## Licence
-
-Licensing information will be defined before the first public software release.
+All rankings are labelled decision support. Human operators retain authority to confirm, reject, override, or request additional evidence. The current prototype must not be deployed in real emergencies.

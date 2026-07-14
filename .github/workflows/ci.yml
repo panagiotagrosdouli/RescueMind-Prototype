@@ -1,0 +1,20 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e '.[dev]'
+      - name: Ruff correctness checks
+        run: ruff check src tests scripts --select F
+      - name: Black check for maintained public test surface
+        run: black --check tests/test_models.py
+      - run: pytest --cov=rescuemind --cov-report=term-missing
+      - run: python scripts/run_all.py --mode smoke
+      - run: python scripts/run_all.py --mode fusion
+      - run: python scripts/run_all.py --mode coordination
+      - run: python scripts/run_all.py --mode priority
