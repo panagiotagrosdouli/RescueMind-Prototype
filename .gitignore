@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build artefacts
+build/
+dist/
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Experimental outputs
+artifacts/
+outputs/
+runs/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+
+# Large or local datasets
+data/raw/
+data/interim/
+data/processed/
+
+# Simulation caches and logs
+log/
+logs/
+.gzserver/
