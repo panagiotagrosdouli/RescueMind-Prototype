@@ -107,10 +107,10 @@ class HypothesisManager:
         reliability = observation.reliability * observation.confidence
         signed = evidence if positive else -evidence
         score = min(1.0, max(0.0, hypothesis.score + 0.18 * reliability * signed))
-        uncertainty = min(
-            1.0,
-            max(0.0, hypothesis.uncertainty - 0.12 * reliability + 0.08 * (not positive)),
-        )
+        if positive:
+            uncertainty = max(0.0, hypothesis.uncertainty - 0.12 * reliability)
+        else:
+            uncertainty = min(1.0, hypothesis.uncertainty + 0.15 * reliability)
         pose_weight = max(0.05, reliability / max(observation.spatial_uncertainty, 0.1))
         old_weight = max(0.05, 1.0 / max(hypothesis.uncertainty, 0.1))
         pose = Pose2D(
