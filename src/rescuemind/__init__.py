@@ -31,6 +31,7 @@ from .spatial import (
     evaluate_associations,
 )
 from .temporal import AlignedObservation, AsynchronousObservationBuffer, ClockOffsetRegistry
+from .twin import LivingDisasterTwin, TwinEvent, TwinSnapshot
 
 __version__ = "0.2.0"
 
@@ -53,6 +54,7 @@ __all__ = [
     "Hazard",
     "Hypothesis",
     "InspectionTask",
+    "LivingDisasterTwin",
     "MahalanobisAssociator",
     "Observation",
     "Pose2D",
@@ -69,6 +71,8 @@ __all__ = [
     "Survivor",
     "TaskAssignment",
     "TemporalBuffer",
+    "TwinEvent",
+    "TwinSnapshot",
     "calibration_metrics",
     "evaluate_associations",
     "run_simulation",
