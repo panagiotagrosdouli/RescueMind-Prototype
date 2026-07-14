@@ -1,5 +1,12 @@
 """RescueMind synthetic multi-agent disaster intelligence research prototype."""
 
+from .allocation import (
+    AgentTaskBid,
+    AllocationResult,
+    InspectionTask,
+    RiskAwareAllocator,
+    TaskAssignment,
+)
 from .decision import Allocator, CommunicationNetwork, DigitalTwin, Explainer, PriorityModel
 from .fusion import ConflictDetector, Fusion, calibration_metrics
 from .models import (
@@ -29,7 +36,9 @@ __version__ = "0.2.0"
 
 __all__ = [
     "Agent",
+    "AgentTaskBid",
     "AlignedObservation",
+    "AllocationResult",
     "Allocator",
     "AssociationMetrics",
     "AssignmentResult",
@@ -43,6 +52,7 @@ __all__ = [
     "Fusion",
     "Hazard",
     "Hypothesis",
+    "InspectionTask",
     "MahalanobisAssociator",
     "Observation",
     "Pose2D",
@@ -53,9 +63,11 @@ __all__ = [
     "ProbabilisticPriorityEngine",
     "Provenance",
     "ReliabilityState",
+    "RiskAwareAllocator",
     "SensorSuite",
     "SpatialMatch",
     "Survivor",
+    "TaskAssignment",
     "TemporalBuffer",
     "calibration_metrics",
     "evaluate_associations",
