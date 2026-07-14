@@ -1,0 +1,39 @@
+project:
+  name: RescueMind Prototype
+  random_seed: 42
+
+experiment:
+  scenario: synthetic_urban_rubble
+  repetitions: 10
+  output_directory: outputs/baseline
+
+agents:
+  aerial:
+    count: 2
+    communication_range_m: 120.0
+    nominal_endurance_min: 18.0
+  ground:
+    count: 2
+    communication_range_m: 60.0
+    nominal_endurance_min: 45.0
+  beacons:
+    count: 4
+
+fusion:
+  temporal_tolerance_s: 1.0
+  spatial_gate_m: 2.0
+  minimum_observation_confidence: 0.25
+  uncertainty_method: calibrated_probability
+
+rescue_priority:
+  weights:
+    human_presence: 0.30
+    survivability: 0.25
+    accessibility: 0.15
+    safety: 0.15
+    urgency: 0.15
+  uncertainty_penalty: 0.20
+
+logging:
+  level: INFO
+  structured: true
