@@ -4,40 +4,23 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rescuemind"
-version = "0.1.0"
-description = "Research software for uncertainty-aware multi-agent disaster perception and rescue prioritization."
+version = "0.2.0"
+description = "Synthetic uncertainty-aware multi-agent disaster intelligence research prototype."
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [
-  { name = "Panagiota Grosdouli" }
-]
-keywords = [
-  "robotics",
-  "sensor-fusion",
-  "multi-agent-systems",
-  "disaster-response",
-  "decision-support"
-]
-classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
-  "Intended Audience :: Science/Research",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
-  "Topic :: Scientific/Engineering :: Artificial Intelligence"
-]
+authors = [{ name = "Panagiota Grosdouli" }]
+license = { text = "MIT" }
+keywords = ["robotics", "sensor-fusion", "multi-agent-systems", "disaster-response", "decision-support"]
 dependencies = [
   "numpy>=1.26,<3.0",
-  "pydantic>=2.7,<3.0",
-  "pyyaml>=6.0,<7.0"
+  "matplotlib>=3.8,<4.0",
+  "Pillow>=10,<13",
+  "imageio>=2.31,<3.0",
+  "imageio-ffmpeg>=0.4,<1.0"
 ]
 
 [project.optional-dependencies]
-dev = [
-  "mypy>=1.10,<2.0",
-  "pytest>=8.2,<9.0",
-  "pytest-cov>=5.0,<6.0",
-  "ruff>=0.5,<1.0"
-]
+dev = ["mypy>=1.10,<2.0", "pytest>=8.2,<9.0", "pytest-cov>=5.0,<7.0", "ruff>=0.5,<1.0", "black>=24,<26"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rescuemind"]
@@ -47,13 +30,12 @@ testpaths = ["tests"]
 addopts = "--strict-markers --strict-config"
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py311"
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "RUF"]
+[tool.black]
+line-length = 120
 
 [tool.mypy]
 python_version = "3.11"
-strict = true
-packages = ["rescuemind"]
+ignore_missing_imports = true
