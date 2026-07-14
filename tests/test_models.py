@@ -1,51 +1,18 @@
-"""Tests for the initial RescueMind domain models."""
+"""Validation tests for implemented RescueMind domain models."""
 
-from datetime import datetime, timezone
-
-import pytest
-from pydantic import ValidationError
-
-from rescuemind.models import Observation, RescuePriorityEstimate, SensorModality
+from rescuemind import Hypothesis, Observation, Pose2D, PriorityModel, Provenance
 
 
-def test_observation_accepts_timezone_aware_timestamp() -> None:
-    observation = Observation(
-        observation_id="obs-001",
-        source_id="thermal-camera-01",
-        modality=SensorModality.THERMAL,
-        timestamp=datetime.now(timezone.utc),
-        frame_id="map",
-        confidence=0.82,
-        payload={"maximum_temperature_c": 36.7},
-    )
-
-    assert observation.confidence == pytest.approx(0.82)
+def test_observation_preserves_provenance_and_validity() -> None:
+    provenance = Provenance("obs-001", "uav-1", "uav-1:thermal")
+    observation = Observation("thermal", 0.82, 0.9, 0.8, 1.0, Pose2D(2, 3), 1.2, 3.0, provenance)
+    assert observation.provenance.observation_id == "obs-001"
+    assert not observation.stale(3.0)
+    assert observation.stale(5.0)
 
 
-def test_observation_rejects_naive_timestamp() -> None:
-    with pytest.raises(ValidationError):
-        Observation(
-            observation_id="obs-002",
-            source_id="microphone-array-01",
-            modality=SensorModality.ACOUSTIC,
-            timestamp=datetime.now(),
-            frame_id="robot_base",
-            confidence=0.60,
-            payload={"event": "human_voice"},
-        )
-
-
-def test_rescue_priority_estimate_is_bounded() -> None:
-    estimate = RescuePriorityEstimate(
-        location_id="sector-a3",
-        human_presence_probability=0.88,
-        survivability_probability=0.72,
-        accessibility=0.55,
-        safety=0.63,
-        urgency=0.91,
-        uncertainty=0.24,
-        score=0.74,
-        supporting_observation_ids=("obs-001", "obs-003"),
-    )
-
-    assert 0.0 <= estimate.score <= 1.0
+def test_priority_estimate_exposes_bounded_interval_and_decomposition() -> None:
+    hypothesis = Hypothesis("site-a3", Pose2D(4, 5), 0.78, 0.24, urgency=0.91, accessibility=0.55, hazard=0.2)
+    estimate = PriorityModel().score(hypothesis, travel_time=12.0)
+    assert estimate.low < estimate.score < estimate.high
+    assert abs(sum(estimate.decomposition.values()) - estimate.score) < 1e-9
