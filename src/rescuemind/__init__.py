@@ -8,6 +8,7 @@ from .allocation import (
     TaskAssignment,
 )
 from .decision import Allocator, CommunicationNetwork, DigitalTwin, Explainer, PriorityModel
+from .execution import ExecutionEvent, MissionExecutor, MissionTask, TaskState
 from .fusion import ConflictDetector, Fusion, calibration_metrics
 from .models import (
     Agent,
@@ -49,6 +50,7 @@ __all__ = [
     "ConflictDetector",
     "DigitalTwin",
     "DisasterWorld",
+    "ExecutionEvent",
     "Explainer",
     "Fusion",
     "Hazard",
@@ -56,6 +58,8 @@ __all__ = [
     "InspectionTask",
     "LivingDisasterTwin",
     "MahalanobisAssociator",
+    "MissionExecutor",
+    "MissionTask",
     "Observation",
     "Pose2D",
     "PriorityContext",
@@ -70,6 +74,7 @@ __all__ = [
     "SpatialMatch",
     "Survivor",
     "TaskAssignment",
+    "TaskState",
     "TemporalBuffer",
     "TwinEvent",
     "TwinSnapshot",
