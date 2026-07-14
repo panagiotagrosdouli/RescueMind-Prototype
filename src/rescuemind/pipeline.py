@@ -1,38 +1,225 @@
 from __future__ import annotations
+
 import math
 from dataclasses import asdict
-from .models import *
-from .simulation import *
-from .fusion import *
-from .decision import *
 
-def run_simulation(seed=0,steps=18,loss=.15,method='reliability'):
-    world=DisasterWorld(seed);sensors=SensorSuite(world)
-    agents=[Agent('UAV-1','UAV',Pose2D(20,20),3,1,18,['thermal','rgb']),Agent('UGV-1','UGV',Pose2D(5,5),1,1,10,['acoustic','radar','depth']),Agent('NODE-1','STATIC',Pose2D(12,28),0,1,14,['acoustic','environmental'])]
-    net=CommunicationNetwork(seed,loss);buffer=TemporalBuffer();twin=DigitalTwin(world);traces=[];ys=[];ps=[];ranks=[];all_conflicts=[]
-    for t in range(steps):
+from .decision import Allocator, CommunicationNetwork, DigitalTwin, Explainer, PriorityModel
+from .fusion import ConflictDetector, Fusion, calibration_metrics
+from .models import Agent, Hypothesis, Observation, Pose2D
+from .simulation import DisasterWorld, SensorSuite, TemporalBuffer
+
+
+def run_simulation(
+    seed: int = 0,
+    steps: int = 18,
+    loss: float = 0.15,
+    method: str = "reliability",
+) -> dict:
+    world = DisasterWorld(seed)
+    sensors = SensorSuite(world)
+    agents = [
+        Agent("UAV-1", "UAV", Pose2D(20, 20), 3, 1, 18, ["thermal", "rgb"]),
+        Agent(
+            "UGV-1",
+            "UGV",
+            Pose2D(5, 5),
+            1,
+            1,
+            10,
+            ["acoustic", "radar", "depth"],
+        ),
+        Agent(
+            "NODE-1",
+            "STATIC",
+            Pose2D(12, 28),
+            0,
+            1,
+            14,
+            ["acoustic", "environmental"],
+        ),
+    ]
+    network = CommunicationNetwork(seed, loss)
+    buffer = TemporalBuffer()
+    twin = DigitalTwin(world)
+    traces: list[dict] = []
+    labels: list[int] = []
+    probabilities: list[float] = []
+    ranks: list[list[str]] = []
+    all_conflicts: list[dict] = []
+
+    fusion_method = {
+        "fixed": Fusion.fixed,
+        "bayes": Fusion.bayes,
+    }.get(method, Fusion.reliability)
+
+    for timestamp in range(steps):
         world.step()
-        for i,a in enumerate(agents[:2]):
-            target=world.survivors[i];dx,dy=target.pose.x-a.pose.x,target.pose.y-a.pose.y;d=max(1,math.hypot(dx,dy));a.pose=Pose2D(a.pose.x+a.speed*dx/d,a.pose.y+a.speed*dy/d)
-        for a in agents:
-            for m in a.sensors:
-                if m=='depth':continue
+        for index, agent in enumerate(agents[:2]):
+            target = world.survivors[index]
+            dx = target.pose.x - agent.pose.x
+            dy = target.pose.y - agent.pose.y
+            distance = max(1.0, math.hypot(dx, dy))
+            agent.pose = Pose2D(
+                agent.pose.x + agent.speed * dx / distance,
+                agent.pose.y + agent.speed * dy / distance,
+            )
+
+        for agent in agents:
+            for modality in agent.sensors:
+                if modality == "depth":
+                    continue
                 for survivor in world.survivors:
-                    o=sensors.observe(a,survivor,m,t);buffer.add(o);net.send(t,asdict(o))
-        delivered=net.receive(t);aligned=buffer.aligned(t);hyps=[]
+                    observation = sensors.observe(
+                        agent,
+                        survivor,
+                        modality,
+                        timestamp,
+                    )
+                    buffer.add(observation)
+                    network.send(timestamp, asdict(observation))
+
+        delivered = network.receive(timestamp)
+        aligned = buffer.aligned(timestamp)
+        hypotheses: list[Hypothesis] = []
+
         for survivor in world.survivors:
-            local=[o for o in aligned if math.hypot(o.pose.x-survivor.pose.x,o.pose.y-survivor.pose.y)<2]
-            p,u={'fixed':Fusion.fixed,'bayes':Fusion.bayes}.get(method,Fusion.reliability)(local)
-            h=Hypothesis(survivor.survivor_id,survivor.pose,p,u,[o.provenance.observation_id for o in local if o.value>=.5],[o.provenance.observation_id for o in local if o.value<.3],urgency=survivor.urgency)
-            x,y=int(h.pose.x),int(h.pose.y);h.hazard=float(world.hazard[y,x]);h.accessibility=float(world.accessibility[y,x]);h.status='HIGH_PRIORITY' if p>.75 else 'PROBABLE' if p>.6 else 'POSSIBLE' if p>.45 else 'REQUIRES_REOBSERVATION'
-            twin.update(h,t);hyps.append(h);ys.append(1);ps.append(p)
-        neg=[o for o in aligned if o.modality=='thermal'][:2]
-        pneg,_=Fusion.reliability([Observation(o.modality,max(0,o.value-.55),o.confidence,o.reliability,o.timestamp,Pose2D(2,2),o.spatial_uncertainty,o.valid_for,o.provenance,o.raw) for o in neg]);ys.append(0);ps.append(pneg)
-        pri=[PriorityModel().score(h,math.hypot(h.pose.x-5,h.pose.y-5)) for h in hyps];pri.sort(key=lambda x:x.score,reverse=True);ranks.append([p.site_id for p in pri])
-        allocation=Allocator.allocate(agents,hyps,'communication_aware',1-loss);conflicts=[]
-        for h in hyps:conflicts+=ConflictDetector.detect([o for o in aligned if o.pose==h.pose])
-        all_conflicts+=conflicts;top=next(h for h in hyps if h.hypothesis_id==pri[0].site_id);ex=Explainer.explain(pri[0],top,conflicts,pri[1:])
-        traces.append({'t':t,'agents':[asdict(a) for a in agents],'hypotheses':[asdict(h) for h in hyps],'priorities':[asdict(x) for x in pri],'allocation':allocation,'delivered_messages':len(delivered),'conflicts':conflicts,'explanation':ex})
-    reversals=sum(ranks[i][0]!=ranks[i-1][0] for i in range(1,len(ranks)))
-    metrics=calibration_metrics(ys,ps)|{'rank_reversals':reversals,'messages_sent':net.sent,'messages_delivered':net.delivered,'messages_dropped':net.dropped,'packet_loss_observed':net.dropped/max(1,net.sent),'twin_revisions':twin.revision,'conflicts_detected':len(all_conflicts)}
-    return {'seed':seed,'method':method,'world':world,'agents':agents,'twin':twin,'traces':traces,'metrics':metrics}
+            local_observations = [
+                observation
+                for observation in aligned
+                if math.hypot(
+                    observation.pose.x - survivor.pose.x,
+                    observation.pose.y - survivor.pose.y,
+                )
+                < 2.0
+            ]
+            probability, uncertainty = fusion_method(local_observations)
+            hypothesis = Hypothesis(
+                survivor.survivor_id,
+                survivor.pose,
+                probability,
+                uncertainty,
+                [
+                    observation.provenance.observation_id
+                    for observation in local_observations
+                    if observation.value >= 0.5
+                ],
+                [
+                    observation.provenance.observation_id
+                    for observation in local_observations
+                    if observation.value < 0.3
+                ],
+                urgency=survivor.urgency,
+            )
+            x = int(hypothesis.pose.x)
+            y = int(hypothesis.pose.y)
+            hypothesis.hazard = float(world.hazard[y, x])
+            hypothesis.accessibility = float(world.accessibility[y, x])
+            if probability > 0.75:
+                hypothesis.status = "HIGH_PRIORITY"
+            elif probability > 0.6:
+                hypothesis.status = "PROBABLE"
+            elif probability > 0.45:
+                hypothesis.status = "POSSIBLE"
+            else:
+                hypothesis.status = "REQUIRES_REOBSERVATION"
+            twin.update(hypothesis, timestamp)
+            hypotheses.append(hypothesis)
+            labels.append(1)
+            probabilities.append(probability)
+
+        negative_observations = [
+            observation for observation in aligned if observation.modality == "thermal"
+        ][:2]
+        negative_probability, _ = Fusion.reliability(
+            [
+                Observation(
+                    observation.modality,
+                    max(0.0, observation.value - 0.55),
+                    observation.confidence,
+                    observation.reliability,
+                    observation.timestamp,
+                    Pose2D(2, 2),
+                    observation.spatial_uncertainty,
+                    observation.valid_for,
+                    observation.provenance,
+                    observation.raw,
+                )
+                for observation in negative_observations
+            ]
+        )
+        labels.append(0)
+        probabilities.append(negative_probability)
+
+        priorities = [
+            PriorityModel().score(
+                hypothesis,
+                math.hypot(hypothesis.pose.x - 5, hypothesis.pose.y - 5),
+            )
+            for hypothesis in hypotheses
+        ]
+        priorities.sort(key=lambda estimate: estimate.score, reverse=True)
+        ranks.append([estimate.site_id for estimate in priorities])
+        allocation = Allocator.allocate(
+            agents,
+            hypotheses,
+            "communication_aware",
+            1.0 - loss,
+        )
+        conflicts: list[dict] = []
+        for hypothesis in hypotheses:
+            conflicts.extend(
+                ConflictDetector.detect(
+                    [
+                        observation
+                        for observation in aligned
+                        if observation.pose == hypothesis.pose
+                    ]
+                )
+            )
+        all_conflicts.extend(conflicts)
+        top_hypothesis = next(
+            hypothesis
+            for hypothesis in hypotheses
+            if hypothesis.hypothesis_id == priorities[0].site_id
+        )
+        explanation = Explainer.explain(
+            priorities[0],
+            top_hypothesis,
+            conflicts,
+            priorities[1:],
+        )
+        traces.append(
+            {
+                "t": timestamp,
+                "agents": [asdict(agent) for agent in agents],
+                "hypotheses": [asdict(hypothesis) for hypothesis in hypotheses],
+                "priorities": [asdict(estimate) for estimate in priorities],
+                "allocation": allocation,
+                "delivered_messages": len(delivered),
+                "conflicts": conflicts,
+                "explanation": explanation,
+            }
+        )
+
+    reversals = sum(
+        ranks[index][0] != ranks[index - 1][0]
+        for index in range(1, len(ranks))
+    )
+    metrics = calibration_metrics(labels, probabilities) | {
+        "rank_reversals": reversals,
+        "messages_sent": network.sent,
+        "messages_delivered": network.delivered,
+        "messages_dropped": network.dropped,
+        "packet_loss_observed": network.dropped / max(1, network.sent),
+        "twin_revisions": twin.revision,
+        "conflicts_detected": len(all_conflicts),
+    }
+    return {
+        "seed": seed,
+        "method": method,
+        "world": world,
+        "agents": agents,
+        "twin": twin,
+        "traces": traces,
+        "metrics": metrics,
+    }
