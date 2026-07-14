@@ -1,0 +1,22 @@
+version: 0.2.0
+status: Research Prototype
+validation: Synthetic Validation
+implemented:
+  - deterministic disaster simulator
+  - UAV, UGV, static sensor node
+  - multimodal observations with provenance
+  - online reliability and stale rejection
+  - fixed, reliability-weighted, Bayesian fusion
+  - conflict detection
+  - dynamic disaster twin
+  - survivor hypotheses
+  - decomposable rescue priority with intervals
+  - four allocation strategies
+  - packet loss and delay
+  - grounded explanations and counterfactuals
+  - metrics, figures, GIF and MP4 generation pipeline
+pending:
+  - ROS2 runtime validation
+  - external dataset validation
+  - hardware validation
+  - operational validation
