@@ -14,6 +14,7 @@ from .models import (
     Survivor,
 )
 from .pipeline import run_simulation
+from .priority import PriorityContext, PriorityWeights, ProbabilisticPriorityEngine
 from .simulation import DisasterWorld, SensorSuite, TemporalBuffer
 from .spatial import (
     AssociationMetrics,
@@ -45,8 +46,11 @@ __all__ = [
     "MahalanobisAssociator",
     "Observation",
     "Pose2D",
+    "PriorityContext",
     "PriorityEstimate",
     "PriorityModel",
+    "PriorityWeights",
+    "ProbabilisticPriorityEngine",
     "Provenance",
     "ReliabilityState",
     "SensorSuite",
