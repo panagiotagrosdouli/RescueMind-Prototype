@@ -21,6 +21,14 @@ from .models import (
     ReliabilityState,
     Survivor,
 )
+from .network import (
+    DeliveryRecord,
+    MeshNetworkSimulator,
+    NetworkLink,
+    NetworkMessage,
+    NetworkMetrics,
+    NetworkNode,
+)
 from .pipeline import run_simulation
 from .priority import PriorityContext, PriorityWeights, ProbabilisticPriorityEngine
 from .simulation import DisasterWorld, SensorSuite, TemporalBuffer
@@ -48,6 +56,7 @@ __all__ = [
     "ClockOffsetRegistry",
     "CommunicationNetwork",
     "ConflictDetector",
+    "DeliveryRecord",
     "DigitalTwin",
     "DisasterWorld",
     "ExecutionEvent",
@@ -58,8 +67,13 @@ __all__ = [
     "InspectionTask",
     "LivingDisasterTwin",
     "MahalanobisAssociator",
+    "MeshNetworkSimulator",
     "MissionExecutor",
     "MissionTask",
+    "NetworkLink",
+    "NetworkMessage",
+    "NetworkMetrics",
+    "NetworkNode",
     "Observation",
     "Pose2D",
     "PriorityContext",
