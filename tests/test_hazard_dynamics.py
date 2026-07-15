@@ -1,4 +1,4 @@
-from rescumind.hazard_dynamics import (
+from rescuemind.hazard_dynamics import (
     HazardCell,
     HazardParameters,
     HazardPropagationModel,
