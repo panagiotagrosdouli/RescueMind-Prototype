@@ -35,6 +35,13 @@ from .frontier import (
     FrontierPlan,
 )
 from .fusion import ConflictDetector, Fusion, calibration_metrics
+from .hazard_dynamics import (
+    HazardCell,
+    HazardKind,
+    HazardParameters,
+    HazardPropagationModel,
+    HazardSnapshot,
+)
 from .models import (
     Agent,
     Hazard,
@@ -100,6 +107,11 @@ __all__ = [
     "FrontierPlan",
     "Fusion",
     "Hazard",
+    "HazardCell",
+    "HazardKind",
+    "HazardParameters",
+    "HazardPropagationModel",
+    "HazardSnapshot",
     "Hypothesis",
     "InspectionTask",
     "LivingDisasterTwin",
