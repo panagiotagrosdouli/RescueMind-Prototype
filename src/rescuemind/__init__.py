@@ -1,5 +1,13 @@
 """RescueMind synthetic multi-agent disaster intelligence research prototype."""
 
+from .active_perception import (
+    CollaborativePerceptionPlanner,
+    PerceptionAssignment,
+    PerceptionBid,
+    PerceptionPlan,
+    PerceptionTarget,
+    Viewpoint,
+)
 from .allocation import (
     AgentTaskBid,
     AllocationResult,
@@ -54,6 +62,7 @@ __all__ = [
     "AssignmentResult",
     "AsynchronousObservationBuffer",
     "ClockOffsetRegistry",
+    "CollaborativePerceptionPlanner",
     "CommunicationNetwork",
     "ConflictDetector",
     "DeliveryRecord",
@@ -75,6 +84,10 @@ __all__ = [
     "NetworkMetrics",
     "NetworkNode",
     "Observation",
+    "PerceptionAssignment",
+    "PerceptionBid",
+    "PerceptionPlan",
+    "PerceptionTarget",
     "Pose2D",
     "PriorityContext",
     "PriorityEstimate",
@@ -92,6 +105,7 @@ __all__ = [
     "TemporalBuffer",
     "TwinEvent",
     "TwinSnapshot",
+    "Viewpoint",
     "calibration_metrics",
     "evaluate_associations",
     "run_simulation",
