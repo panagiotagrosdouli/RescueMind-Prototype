@@ -175,15 +175,15 @@ class HazardPropagationModel:
         field: str,
     ) -> float:
         total = 0.0
-        normalizer = 0.0
+        active_neighbours = 0
         for nx, ny in neighbours:
             neighbour = cells[self._index(nx, ny)]
             if neighbour.blocked:
                 continue
             weight = self._wind_weight(nx, ny, x, y)
             total += getattr(neighbour, field) * weight
-            normalizer += weight
-        return total / normalizer if normalizer else 0.0
+            active_neighbours += 1
+        return total / active_neighbours if active_neighbours else 0.0
 
     def _wind_weight(self, source_x: int, source_y: int, target_x: int, target_y: int) -> float:
         p = self.parameters
