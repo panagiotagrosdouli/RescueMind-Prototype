@@ -15,6 +15,13 @@ from .allocation import (
     RiskAwareAllocator,
     TaskAssignment,
 )
+from .bayesian_world import (
+    BayesianEvidence,
+    BayesianWorldModel,
+    CredibleInterval,
+    ReobservationDecision,
+    SurvivorBelief,
+)
 from .decision import Allocator, CommunicationNetwork, DigitalTwin, Explainer, PriorityModel
 from .execution import ExecutionEvent, MissionExecutor, MissionTask, TaskState
 from .frontier import (
@@ -74,10 +81,13 @@ __all__ = [
     "AssociationMetrics",
     "AssignmentResult",
     "AsynchronousObservationBuffer",
+    "BayesianEvidence",
+    "BayesianWorldModel",
     "ClockOffsetRegistry",
     "CollaborativePerceptionPlanner",
     "CommunicationNetwork",
     "ConflictDetector",
+    "CredibleInterval",
     "DeliveryRecord",
     "DigitalTwin",
     "DisasterWorld",
@@ -114,10 +124,12 @@ __all__ = [
     "ProbabilisticPriorityEngine",
     "Provenance",
     "ReliabilityState",
+    "ReobservationDecision",
     "RiskAwareAllocator",
     "SensorSuite",
     "SpatialMatch",
     "Survivor",
+    "SurvivorBelief",
     "TaskAssignment",
     "TaskState",
     "TemporalBuffer",
