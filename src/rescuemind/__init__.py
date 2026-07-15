@@ -17,6 +17,16 @@ from .allocation import (
 )
 from .decision import Allocator, CommunicationNetwork, DigitalTwin, Explainer, PriorityModel
 from .execution import ExecutionEvent, MissionExecutor, MissionTask, TaskState
+from .frontier import (
+    FREE,
+    OCCUPIED,
+    UNKNOWN,
+    Frontier,
+    FrontierAssignment,
+    FrontierBid,
+    FrontierExplorer,
+    FrontierPlan,
+)
 from .fusion import ConflictDetector, Fusion, calibration_metrics
 from .models import (
     Agent,
@@ -53,6 +63,9 @@ from .twin import LivingDisasterTwin, TwinEvent, TwinSnapshot
 __version__ = "0.2.0"
 
 __all__ = [
+    "FREE",
+    "OCCUPIED",
+    "UNKNOWN",
     "Agent",
     "AgentTaskBid",
     "AlignedObservation",
@@ -70,6 +83,11 @@ __all__ = [
     "DisasterWorld",
     "ExecutionEvent",
     "Explainer",
+    "Frontier",
+    "FrontierAssignment",
+    "FrontierBid",
+    "FrontierExplorer",
+    "FrontierPlan",
     "Fusion",
     "Hazard",
     "Hypothesis",
